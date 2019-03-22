@@ -29,6 +29,7 @@ namespace RAG
         #region Fields
 
         public static RAG Instance;
+        public Dictionary<CSteamID, Player> Players;
 
         #endregion
 
@@ -37,6 +38,8 @@ namespace RAG
         protected override void Load()
         {
             Instance = this;
+            Players = new Dictionary<CSteamID, Player>();
+
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
             UnturnedPlayerEvents.OnPlayerDeath += Events_OnPlayerDeath;
@@ -76,10 +79,26 @@ namespace RAG
 
         public void Events_OnPlayerConnected(UnturnedPlayer player)
         {
+            // add new player
+            Player plr = new Player();
+            plr.CharacterName = player.CharacterName;
+            plr.SteamID = player.CSteamID;
+            plr.Kills = 0;
+            plr.Deaths = 0;
+
+            Players.Add(player.CSteamID, plr);
+
+            if (Configuration.Instance.Debug)
+                Console.WriteLine(player.CharacterName + " (" + player.CSteamID + ") Connected!");
         }
 
         public void Events_OnPlayerDisconnected(UnturnedPlayer player)
         {
+            // remove player
+            Players.Remove(player.CSteamID);
+
+            if (Configuration.Instance.Debug)
+                Console.WriteLine(player.CharacterName + " (" + player.CSteamID + ") Disconnected!");
         }
 
         public void Events_OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
