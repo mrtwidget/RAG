@@ -60,7 +60,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Players.cs" />
+    <Compile Include="Commands\CommandArena.cs" />
+    <Compile Include="Commands\CommandRAG.cs" />
+    <Compile Include="Commands\CommandSpectator.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="RAG.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RAGConfiguration.cs" />

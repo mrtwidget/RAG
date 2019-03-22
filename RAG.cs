@@ -30,7 +30,9 @@ namespace RAG
 
         public static RAG Instance;
         public Dictionary<CSteamID, Player> Players;
-
+        public enum GameStates { Waiting = 1, Intermission = 2, Active = 3 }
+        public GameStates MatchState;
+        public DateTime? LastStateChange;
         #endregion
 
         #region Overrides
@@ -39,6 +41,7 @@ namespace RAG
         {
             Instance = this;
             Players = new Dictionary<CSteamID, Player>();
+            MatchState = GameStates.Waiting;
 
             U.Events.OnPlayerConnected += Events_OnPlayerConnected;
             U.Events.OnPlayerDisconnected += Events_OnPlayerDisconnected;
@@ -64,7 +67,10 @@ namespace RAG
             get
             {
                 return new TranslationList() {
-                    {"rag_disabled", "RAG is currently unavailable"}
+                    {"rag_disabled", "RAG is currently unavailable"},
+                    {"rag_spectator_mode", "Spectator Mode {0}!"},
+                    {"rag_game_state", "{0} has started!"},
+                    {"rag_player_status", "You have {0} Kills and {1} Deaths"}
                 };
             }
         }
@@ -85,6 +91,7 @@ namespace RAG
             plr.SteamID = player.CSteamID;
             plr.Kills = 0;
             plr.Deaths = 0;
+            plr.Spectator = false;
 
             Players.Add(player.CSteamID, plr);
 
@@ -103,6 +110,22 @@ namespace RAG
 
         public void Events_OnPlayerDeath(UnturnedPlayer player, EDeathCause cause, ELimb limb, CSteamID murderer)
         {
+            if (murderer.ToString().StartsWith("7656"))
+            {
+                if (player.CSteamID == murderer)
+                    return;
+
+                // death effect for player
+                player.TriggerEffect(123); // explode
+                player.TriggerEffect(128); // expanding white circles
+
+                // effect and payout for murderer
+                UnturnedPlayer.FromCSteamID(murderer).TriggerEffect(131); // yellow aura scream
+
+                // add stats
+                Players[player.CSteamID].Deaths++;
+                Players[murderer].Kills++;
+            }
         }
 
         public void Events_OnPlayerChatted(UnturnedPlayer player, ref Color color, string message, EChatMode chatMode, ref bool cancel)
@@ -114,7 +137,47 @@ namespace RAG
         public void FixedUpdate()
         {
             if (Instance.State != PluginState.Loaded) return;
-            
+
+            // if minimum players join, start intermission
+            if (MatchState == GameStates.Waiting && Players.Count() >= Configuration.Instance.MinPlayers)
+            {
+                MatchState = GameStates.Intermission;
+                UnturnedChat.Say(Translations.Instance.Translate("rag_game_state", "Intermission"), Color.yellow);
+
+                if (Configuration.Instance.Debug)
+                    Console.WriteLine("Minimum players have joined. Starting Intermission!");
+            }
+
+            // if intermission finshes, start match
+            if (MatchState == GameStates.Intermission)
+            {
+                if (LastStateChange == null)
+                    LastStateChange = DateTime.Now;
+
+                if ((DateTime.Now - LastStateChange.Value).TotalSeconds > Configuration.Instance.IntermissionLength)
+                {
+                    LastStateChange = DateTime.Now;
+
+                    MatchState = GameStates.Active;
+                    UnturnedChat.Say(Translations.Instance.Translate("rag_game_state", "Match"), Color.cyan);
+                }
+            }
+
+            // if match finishes, start intermission
+            if (MatchState == GameStates.Active)
+            {
+                if (LastStateChange == null)
+                    LastStateChange = DateTime.Now;
+
+                if ((DateTime.Now - LastStateChange.Value).TotalSeconds > Configuration.Instance.MatchLength)
+                {
+                    LastStateChange = DateTime.Now;
+
+                    MatchState = GameStates.Intermission;
+                    UnturnedChat.Say(Translations.Instance.Translate("rag_game_state", "Intermission"), Color.yellow);
+                }
+            }
+
         }
     }
 }
