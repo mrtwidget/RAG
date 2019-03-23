@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\CommandArena.cs" />
+    <Compile Include="Commands\CommandPOS.cs" />
     <Compile Include="Commands\CommandRAG.cs" />
     <Compile Include="Commands\CommandSpectator.cs" />
     <Compile Include="Player.cs" />

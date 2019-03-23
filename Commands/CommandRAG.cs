@@ -30,27 +30,31 @@ namespace RAG.Commands
         public void Execute(IRocketPlayer caller, params string[] command)
         {
             UnturnedPlayer player = (UnturnedPlayer)caller;
-
-            if (command.Length > 1)
-            {
-                if (command[0] == "start")
-                {
-                    RAG.Instance.LastStateChange = DateTime.Now;
-                    RAG.Instance.MatchState = RAG.GameStates.Active;
-                    UnturnedChat.Say(RAG.Instance.Translations.Instance.Translate("rag_game_state", "Match"), Color.cyan);
-                }                    
-                else if(command[0] == "stop")
-                {
-                    RAG.Instance.LastStateChange = DateTime.Now;
-                    RAG.Instance.MatchState = RAG.GameStates.Intermission;
-                    UnturnedChat.Say(RAG.Instance.Translations.Instance.Translate("rag_game_state", "Intermission"), Color.yellow);
-                }                    
-            }
-            else
+            
+            if (command.Length == 0)
             {
                 UnturnedChat.Say(caller, RAG.Instance.Translations.Instance.Translate("rag_player_status", RAG.Instance.Players[player.CSteamID].Kills, RAG.Instance.Players[player.CSteamID].Deaths), Color.white);
+                return;
             }
-            
+
+            switch (command[0])
+            {
+                case "start":
+                    // start the match
+                    RAG.Instance.LastStateChange = DateTime.Now;
+                    RAG.Instance.MatchState = RAG.GameStates.Active;
+                    RAG.Instance.Loadout(); // teleport and arm players
+                    UnturnedChat.Say(RAG.Instance.Translations.Instance.Translate("rag_game_state", "Match"), Color.cyan);
+                    break;
+                case "stop":
+                    // stop the match
+                    RAG.Instance.LastStateChange = DateTime.Now;
+                    RAG.Instance.MatchState = RAG.GameStates.Intermission;
+                    RAG.Instance.Intermission(); // return players to lobby
+                    UnturnedChat.Say(RAG.Instance.Translations.Instance.Translate("rag_game_state", "Intermission"), Color.yellow);
+                    break;
+            }
+
         }
     }
 }
