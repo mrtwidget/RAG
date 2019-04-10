@@ -28,9 +28,7 @@ Commands
 <br> >Can edit everything and add spawns anywhere by using `/addspawn`
 
 ## Contributors
-Nexis 
-<br>
-Owl
+<a href="https://steamcommunity.com/id/nexisrealms"><img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/4f/4fcbc28e74f9e9898d7ee63086ae235ea64d3114_medium.jpg"></a> <a href="https://steamcommunity.com/id/thatguyovertherewatchingme"><img src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/97/975cc002819622e38ed012ce799c57c22d912bae_medium.jpg"></a>
 
 [Join our discord server](https://discord.nexisrealms.com "TNR Discord server")
 <br>
